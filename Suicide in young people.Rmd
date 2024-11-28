@@ -7,21 +7,30 @@ date: "2024-11-21"
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
+## Title: The epidemic of suicide in Scotland, aged 11-25
+
+##introduction 
+
+
+For my project I will be trying to answer the question: 'Is death by suicide rising in young people in Scotland?'. Suicide in young people is a tragic consequence of poor mental health, poor mental health services, and social impact on young people. Analysising data from suicide rates could help us in the future to identify risk factors and descrease and prevent suicide. 
+
 
 ## Load packages 
+
+We first need to start by loading packages needed for the 
 
 ```{r load-packages}
 library(tidyverse)
 
 ```
 
-## Title and introduction 
+## Data acquisition
 
-
-
-## Data section 
+The data I will be using in this report is the "Deaths by suicide in young people, aged 11-25 years" from Scotpho: https://scotland.shinyapps.io/ScotPHO_profiles_tool/
 
 ## Read in data 
+
+Firstly the data is 'read in' as follows. The data I am using in this report contains a "period" column. This columns cells contain numbers that are a range of five years. To ease visual representation in my diagram I will be using the initial year the 'period' begins. Due to this code has been written to command only the 1-4 digits be used. 
 
 ```{r read-data}
 Suicide_data <- read.csv("~/Documents/Trends_ScotPHO_data_extract_2024-10-21.csv")
@@ -30,12 +39,19 @@ Suicide_data <- Suicide_data %>%
   mutate(year_start = substr(trend_axis, 1, 4))
 ```
 
-## Prepare data 
+## Inspect Data
+
+We use the glimpse function to initially inspect the data we have imported. 
 
 ```{r inspect_data}
 glimpse(Suicide_data)
 ```
+
+##Data cleaning and preperation
+
 ## Select trend_axis and measure 
+
+The data we are using in this report has 10 columns, we are most interested in two to make our graph from. Due to this we need to select and isolate the nesicary columns. 
 
 ```{r select_trend_axis_and_measure}
 Deaths_from_suicide_in_young_people_aged_11_to_25_years <- Suicide_data %>%
@@ -47,12 +63,16 @@ head(Deaths_from_suicide_in_young_people_aged_11_to_25_years)
 ```
 
 ## Remove missing values 
+
+Missing values are then taken out from our data.In this data there have been no missing values or unique values. 
+
 ```{r missing-values}
 Deaths_from_suicide_in_young_people_aged_11_to_25_years$`5-year period` %>% unique()
 Deaths_from_suicide_in_young_people_aged_11_to_25_years$`Crude rate per 100,000 population` %>% table()
 Deaths_from_suicide_in_young_people_aged_11_to_25_years %>% summary()
 ```
 ## Check that data is tidy
+
 
 ```{r tidy-data}
 Suidicde_data <- Suicide_data %>% 
@@ -62,19 +82,7 @@ Suidicde_data <- Suicide_data %>%
 
 ## Plot graph 
 
-```{r plot-graph}
 
-#histogram 
-Suicide_data %>%
-  ggplot(aes(x = `measure`)) +
-  geom_histogram(bins = 17) +
-  labs( 
-    title = "Distribution of Crude Suicide Rates", 
-    x = "Crude rate per 100000 Population", 
-    y = "Frequency"
-  ) + 
-  theme_minimal()
-```
 
 ```{r plot_graph_two}
 Suicide_data %>%
