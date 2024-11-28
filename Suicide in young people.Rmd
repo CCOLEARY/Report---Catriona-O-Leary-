@@ -7,12 +7,12 @@ date: "2024-11-21"
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
-## Title: The epidemic of suicide in Scotland, aged 11-25
+# The epidemic of suicide in Scotland, aged 11-25
 
-##introduction 
+## Introduction 
 
 
-For my project I will be trying to answer the question: 'Is death by suicide rising in young people in Scotland?'. Suicide in young people is a tragic consequence of poor mental health, poor mental health services, and social impact on young people. Analysising data from suicide rates could help us in the future to identify risk factors and descrease and prevent suicide. 
+For my project I will be trying to answer the question: 'Is death by suicide rising in young people in Scotland?'. Suicide in young people is a tragic consequence of poor mental health, poor mental health services, and social impact on young people. Analyzing data from suicide rates could help us in the future to identify risk factors and decrease and prevent suicide. 
 
 
 ## Load packages 
@@ -24,7 +24,7 @@ library(tidyverse)
 
 ```
 
-## Data acquisition
+# Data acquisition
 
 The data I will be using in this report is the "Deaths by suicide in young people, aged 11-25 years" from Scotpho: https://scotland.shinyapps.io/ScotPHO_profiles_tool/
 
@@ -47,7 +47,7 @@ We use the glimpse function to initially inspect the data we have imported.
 glimpse(Suicide_data)
 ```
 
-##Data cleaning and preperation
+# Data cleaning and preperation
 
 ## Select trend_axis and measure 
 
@@ -73,46 +73,34 @@ Deaths_from_suicide_in_young_people_aged_11_to_25_years %>% summary()
 ```
 ## Check that data is tidy
 
-
 ```{r tidy-data}
 Suidicde_data <- Suicide_data %>% 
   mutate(year_start = substr(trend_axis, 1, 4))
 
 ```
 
+# Data analysis and visualisation
+
 ## Plot graph 
 
-
+The most efficient way to plot this graph is a bar chart, with colour to be more visually captivating. for this we use the ggplot and geom_col commands.
 
 ```{r plot_graph_two}
 Suicide_data %>%
   ggplot(aes(x = year_start, y = measure)) +
   geom_col(fill = "yellow", colour = "black") +
   labs(
-    title = "Crude Suicide Rates by Year Start",
-    x = "Year Start",
+    title = "Crude Suicide Rates of young people",
+    x = "5 Year period Start",
     y = "Crude Rate per 100,000 Population"
   ) +
   theme_minimal()
 
 ```
 
+## Graph with trend line
 
-
-## Graph type 3 
-
-```{r trend_line}
-Suicide_data %>%
-  ggplot(aes(x = as.numeric(year_start), y = measure)) +  
-  geom_col(fill = "yellow", colour = "black") +  
-  geom_smooth(method = "lm", se = TRUE, colour = "blue", size = 1) + 
-  labs(
-    title = "Crude Suicide Rates by Year Start with Trend Line",
-    x = "Year Start",
-    y = "Crude Rate per 100,000 Population"
-  ) +
-  theme_minimal()
-```
+As the question of our report is; 'Is the rate of suicide in young people rising?' the most efficient way to visualise this in a graph is by adding a polynomial trend line. This way it is easy at first glance to appreciate the movement in values. 
 
 ```{r Moving_trend_line}
 Suicide_data %>%
@@ -127,6 +115,7 @@ Suicide_data %>%
   theme_minimal()
 ```
 
+# Summary 
 
 
 
