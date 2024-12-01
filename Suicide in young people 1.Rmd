@@ -1,0 +1,146 @@
+---
+title: "Report: Catriona O'Leary"
+output: pdf_document
+date: "2024-11-21"
+includes:
+      in_header: header.tex
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+# Suicide in Young People
+
+## Introduction 
+
+This is a report analyzing data on deaths by suicide in young people aged 11-25 years old in Scotland. Suicide in Scotland makes up 25.7% of all deaths of people under the age of 25, which is staggeringly high compared to the 1.2% of deaths by suicide of people over 25. Those that did commit suicide between the years of 2011 - 2020 were found to be less likely to have had previous contact with mental health services when compared to the over 25 group. With new generations facing a world of economic crisis, social media, cost of living and the impact of the global pandemic it is more important than ever that we analysis these statistic and identify risk factors to decrease and prevent further suicides.
+
+
+### Report question 
+
+The question I will be examining and answering in my report is:
+
+"Is suicide by young people on the rise in Scotland?" 
+
+
+### Load packages 
+
+In order to be able to examine the data and produce a graph from it 'packages' must be loaded onto our R studio which give specific functionality. In this report I will be using the 'tidyverse' package. 
+
+```{r load-packages}
+library(tidyverse)
+
+```
+
+
+# Data acquisition
+
+
+The data I will be using in this report is the "Deaths by suicide in young people, aged 11-25 years" from Scotpho: https://scotland.shinyapps.io/ScotPHO_profiles_tool/
+
+### Read in data 
+
+Firstly the data is 'read in' as follows. The data I am using in this report contains a "period" column. This columns cells contain numbers that are a range of five years. To ease visual representation in my diagram I will be using the initial year the 'period' begins. Due to this code has been written to command only the 1-4 digits be used. 
+
+```{r read-data}
+Suicide_data <- read.csv("~/Documents/Trends_ScotPHO_data_extract_2024-10-21.csv")
+
+Suicide_data <- Suicide_data %>%
+  mutate(year_start = substr(trend_axis, 1, 4))
+```
+
+### Inspect Data
+
+We use the glimpse function to initially inspect the data we have imported. 
+
+```{r inspect_data}
+glimpse(Suicide_data)
+```
+
+# Data cleaning and preperation
+
+### Select trend_axis and measure 
+
+The data we are using in this report has 10 columns, we are most interested in two to make our graph from. Due to this we need to select and isolate the nesicary columns. 
+
+```{r select_trend_axis_and_measure}
+Deaths_from_suicide_in_young_people_aged_11_to_25_years <- Suicide_data %>%
+  select(`trend_axis`,`measure`) %>%
+  rename( `Frequency` = `trend_axis`,
+          `Crude rate per 100000 population` = `measure`)
+head(Deaths_from_suicide_in_young_people_aged_11_to_25_years)
+
+```
+
+### Remove missing values 
+
+Missing values are then taken out from our data. In this data there have been no missing values or unique values. 
+
+```{r missing-values}
+Deaths_from_suicide_in_young_people_aged_11_to_25_years$`5-year period` %>% unique()
+Deaths_from_suicide_in_young_people_aged_11_to_25_years$`Crude rate per 100,000 population` %>% table()
+Deaths_from_suicide_in_young_people_aged_11_to_25_years %>% summary()
+```
+### Check that data is tidy
+
+```{r tidy-data}
+Suidicde_data <- Suicide_data %>% 
+  mutate(year_start = substr(trend_axis, 1, 4))
+
+```
+
+# Data analysis and visualisation
+
+### Plot graph 
+
+The most efficient way to plot this graph is a bar chart, with colour to be more visually captivating, for this we use the ggplot and geom_col commands.
+
+```{r plot_graph_two}
+Suicide_data %>%
+  ggplot(aes(x = year_start, y = measure)) +
+  geom_col(fill = "yellow", colour = "black") +
+  labs(
+    title = "Crude Suicide Rates of young people",
+    x = "5 Year period Start",
+    y = "Crude Rate per 100,000 Population"
+  ) +
+  theme_minimal()
+
+```
+
+### Graph with trend line
+
+As the question of our report is; 'Is the rate of suicide in young people rising?' the most efficient way to visualise this in a graph is by adding a polynomial trend line. This way it is easy at first glance to appreciate the movement in values. 
+
+```{r Moving_trend_line}
+Suicide_data %>%
+  ggplot(aes(x = as.numeric(year_start), y = measure)) +  
+  geom_col(fill = "yellow", colour = "black") +  
+  geom_smooth(method = "lm", formula = y ~ poly(x, 4), se = TRUE, colour = "blue", size = 1) +  
+  labs(
+    title = "Crude Suicide Rates by Year Start with Polynomial Trend Line",
+    x = "Year Start",
+    y = "Crude Rate per 100,000 Population"
+  ) +
+  theme_minimal()
+```
+
+# Summary 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
