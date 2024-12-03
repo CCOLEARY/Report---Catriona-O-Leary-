@@ -36,7 +36,7 @@ library(tidyverse)
 # Data acquisition
 
 
-The data I will be using in this report is the "Deaths by suicide in young people, aged 11-25 years" from Scotpho: https://scotland.shinyapps.io/ScotPHO_profiles_tool/
+The data I will be using in this report is the "Deaths by suicide in young people, aged 11-25 years" sourced from Scotpho: https://scotland.shinyapps.io/ScotPHO_profiles_tool/
 
 ### Read in data 
 
@@ -126,6 +126,14 @@ Suicide_data %>%
 ```
 
 # Summary 
+
+In this report I have examined the rate of suicide by young people (aged 11-25) in the hope of providing insights into the rising number of suicides in Scotland. The target audience for this report includes members of the public as well as organisations whose main focus is on suicide prevention. The manner in which this has been visualised in the report aims to engage people in the topic and to clearly communicate the rise in suicides.  With the overall intention of the report being to prompt people into preventative action.  
+
+The key question explored in this report is whether suicide rates are rising among young people in Scotland. The data analysis shows that after a continuous decrease in crude suicide rate between the starting years of 2002-2012, the suicide rate begins to steadily rise again (as seen in  figure 2). These findings emphasize the need for more accessible mental health services, increased awareness and further investigation into factors which may be contributing to the increase.
+
+The data analysis was conducted using data from ScotPho, from which two columns of information (‘5 year period’ as well as the ‘crude rate per 100,000’) were isolated to give us the data necessary to answer the question posed in the report. However, this is not without its limitations. Many of the ‘5 year periods’ covered in the isolated column are overlapping in time, which may easily lead to repetitive figures being counted and thus giving incorrect insights.  Along with this, there is no details regarding specific age, gender, or health board location. Furthermore, suicide remains an impermissible topic in many communities and religions leading to underreporting which may further affect the accuracy of data. Limitations on data sharing regarding the impact of factors such as socioeconomic conditions also limited the scope of interpretation. 
+
+Finally, the approach with the visualisation of data focuses on simplicity and clarity to ensure accessibility for a wider audience. The strengths of this approach include clarity and visually engaging graphs which effectively highlight the key message of the rise in suicides by young people in Scotland. However, the graph limits cross examination of causative issues as well as inability to further analyse the specific demographics of the suicide data. Additionally, the static nature of the visualisations restricts the ability of users to interact with the data for further insights or specific values of each bar. 
 
 
 
