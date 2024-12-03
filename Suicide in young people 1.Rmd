@@ -9,11 +9,11 @@ includes:
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
-# Suicide in Young People
+# Death From Suicide By Young People In Scotland
 
 ## Introduction 
 
-This is a report analyzing data on deaths by suicide in young people aged 11-25 years old in Scotland. Suicide in Scotland makes up 25.7% of all deaths of people under the age of 25, which is staggeringly high compared to the 1.2% of deaths by suicide of people over 25. Those that did commit suicide between the years of 2011 - 2020 were found to be less likely to have had previous contact with mental health services when compared to the over 25 group. With new generations facing a world of economic crisis, social media, cost of living and the impact of the global pandemic it is more important than ever that we analysis these statistic and identify risk factors to decrease and prevent further suicides.
+This is a report analyzing data on deaths from suicide by young people aged 11-25 years old in Scotland. Suicide in Scotland makes up 25.7% of all deaths of people under the age of 25, which is staggeringly high compared to the 1.2% of deaths by suicide of people over 25 [1]. Those that did commit suicide between the years of 2011 - 2020 were found to be less likely to have had previous contact with mental health services when compared to the over 25 group [2]. With new generations facing a world of economic crisis, social media, cost of living and the impact of the global pandemic it is more important than ever that we analysis these statistic and identify risk factors to decrease and prevent further suicides.
 
 
 ### Report question 
@@ -36,7 +36,7 @@ library(tidyverse)
 # Data acquisition
 
 
-The data I will be using in this report is the "Deaths by suicide in young people, aged 11-25 years" sourced from Scotpho: https://scotland.shinyapps.io/ScotPHO_profiles_tool/
+The data I will be using in this report is the "Deaths by suicide in young people, aged 11-25 years" [3] sourced from Scotpho: https://scotland.shinyapps.io/ScotPHO_profiles_tool/
 
 ### Read in data 
 
@@ -108,6 +108,8 @@ Suicide_data %>%
 
 ```
 
+*Figure 1: Graph of suicide rate by young people*
+
 ### Graph with trend line
 
 As the question of our report is; 'Is the rate of suicide in young people rising?' the most efficient way to visualise this in a graph is by adding a polynomial trend line. This way it is easy at first glance to appreciate the movement in values. 
@@ -124,18 +126,28 @@ Suicide_data %>%
   ) +
   theme_minimal()
 ```
+*Figure 2: Graph of suicide rate by young people with trend Line*
 
-# Summary 
+
+## Summary 
 
 In this report I have examined the rate of suicide by young people (aged 11-25) in the hope of providing insights into the rising number of suicides in Scotland. The target audience for this report includes members of the public as well as organisations whose main focus is on suicide prevention. The manner in which this has been visualised in the report aims to engage people in the topic and to clearly communicate the rise in suicides.  With the overall intention of the report being to prompt people into preventative action.  
 
 The key question explored in this report is whether suicide rates are rising among young people in Scotland. The data analysis shows that after a continuous decrease in crude suicide rate between the starting years of 2002-2012, the suicide rate begins to steadily rise again (as seen in  figure 2). These findings emphasize the need for more accessible mental health services, increased awareness and further investigation into factors which may be contributing to the increase.
 
-The data analysis was conducted using data from ScotPho, from which two columns of information (‘5 year period’ as well as the ‘crude rate per 100,000’) were isolated to give us the data necessary to answer the question posed in the report. However, this is not without its limitations. Many of the ‘5 year periods’ covered in the isolated column are overlapping in time, which may easily lead to repetitive figures being counted and thus giving incorrect insights.  Along with this, there is no details regarding specific age, gender, or health board location. Furthermore, suicide remains an impermissible topic in many communities and religions leading to underreporting which may further affect the accuracy of data. Limitations on data sharing regarding the impact of factors such as socioeconomic conditions also limited the scope of interpretation. 
+The data analysis was conducted using data from ScotPho, from which two columns of information (‘5 year period’ as well as the ‘crude rate per 100,000’) were isolated to give us the data necessary to answer the question posed in the report. However, this is not without its limitations. Many of the ‘5 year periods’ covered in the isolated column are overlapping in time, which may easily lead to repetitive figures being counted and thus giving incorrect insights.  Along with this, there is no details regarding specific age, gender, or health board location. Furthermore, suicide remains an impermissible topic in many communities and religions leading to under-reporting which may further affect the accuracy of data. Limitations on data sharing regarding the impact of factors such as socioeconomic conditions also limited the scope of interpretation. 
 
 Finally, the approach with the visualisation of data focuses on simplicity and clarity to ensure accessibility for a wider audience. The strengths of this approach include clarity and visually engaging graphs which effectively highlight the key message of the rise in suicides by young people in Scotland. However, the graph limits cross examination of causative issues as well as inability to further analyse the specific demographics of the suicide data. Additionally, the static nature of the visualisations restricts the ability of users to interact with the data for further insights or specific values of each bar. 
 
+----------------------------------------------------------------------------------------------------------
 
+# References 
+
+[1] https://publichealthscotland.scot/publications/scottish-suicide-information-database/suicide-among-young-people-in-scotland-a-report-from-the-scottish-suicide-information-database-6-september-2022/
+
+[2] https://publichealthscotland.scot/news/2022/september/new-report-focuses-on-deaths-from-suicide-among-young-people-in-scotland/
+
+[3] https://scotland.shinyapps.io/ScotPHO_profiles_tool/ see indicator 'Deaths from suicide in young people, aged 11-25 years'
 
 
 
