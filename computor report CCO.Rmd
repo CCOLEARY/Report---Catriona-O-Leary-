@@ -10,8 +10,11 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ## Load necessary packages
 
-We begin by loading the nessicary packages required to carry out all comands needed in this report. Tidyverse, as we learnt in our previous module is required for our general data science, along with "ggplots" for visualisation, and corrplot for visualising correlation matrices and tinymodels which was introduced to us this term is required for machine learning - our main focus this term. 
+We begin by loading the nessicary packages required to carry out all comands needed in this report. Tidyverse, as we learnt in our previous module is required for our general data science, along with "ggplots" for visualisation, and corrplot for visualising correlation matrices and tinymodels which was introduced to us this term is required for machine learning - our main focus this term.
+
 ```{r}
+#Install Packages
+
 # install.packages("devtools")
 library(tidyverse)    
 library(tidymodels)   
@@ -26,9 +29,9 @@ devtools::install_github("r-lib/conflicted")
 
 ## Load chosen dataset
 
-We were provided two seperate data sets containing "Provisional Patient Record Outcomes" to select from to answer our question for this assignment. Out of the two I have selected "Knee replacement CCG 2021" which can be found at the following address: https://digital.nhs.uk/data-and-information/publications/statistical/patient-reported-outcome-measures-proms/hip-and-knee-replacement-procedures-april-2020-to-march-2021
+We were provided two seperate data sets containing "Provisional Patient Record Outcomes" to select from to answer our question for this assignment. Out of the two I have selected "Knee replacement CCG 2021" which can be found at the following address: <https://digital.nhs.uk/data-and-information/publications/statistical/patient-reported-outcome-measures-proms/hip-and-knee-replacement-procedures-april-2020-to-march-2021>
 
-To load this data set into my studio to then work with I will be using the "read_csv" function. 
+To load this data set into my studio to then work with I will be using the "read_csv" function.
 
 ```{r}
 #Read in data
@@ -39,29 +42,25 @@ glimpse(Knee_Data)
 
 ## Dataset description
 
-
-
-
 ## Suitable machine learning algorithm for three questions:
 
 #1. Before the operation, can we estimate the post-operative EQ5D index for a patient?
 
-*Answer:* When looking to estimate post-operative EQ5D index we are looking at a regression problem as the EQ5D is a continuos value outcome, therefore require supervised machine learning to solve the issue. This task requires to use a dataset of patient reported outcomes and other relevant information to train a model to predict the EQ5D score. Therefore I would choose to utilise a random forest regressor as it has the ability to handle both catagoricol and numerical predictors and is good when handling data which may contain missing values and outliers. 
+*Answer:* When looking to estimate post-operative EQ5D index we are looking at a regression problem as the EQ5D is a continuos value outcome, therefore require supervised machine learning to solve the issue. This task requires to use a dataset of patient reported outcomes and other relevant information to train a model to predict the EQ5D score. Therefore I would choose to utilise a random forest regressor as it has the ability to handle both catagoricol and numerical predictors and is good when handling data which may contain missing values and outliers.
 
-When looking into which model would be best suited for the task I also investigated the use of linear regression however for this task in particular it is important the model does not assume a linear relationship between variables and allows for more flexibility when working with more complex interactions in patient data, e.g age or pre-existing conditions. 
+When looking into which model would be best suited for the task I also investigated the use of linear regression however for this task in particular it is important the model does not assume a linear relationship between variables and allows for more flexibility when working with more complex interactions in patient data, e.g age or pre-existing conditions.
 
-Overall, I beleive Random forest has a better balance of predictive performance with practical usability for this task making it my choice for estimating post-operative EQ5D- index. 
-
+Overall, I beleive Random forest has a better balance of predictive performance with practical usability for this task making it my choice for estimating post-operative EQ5D- index.
 
 #2. Before the operation, can we predict how much pain a patient will have after the operation?
 
-*Answers:* In the 'Knee replacement data set' we have the data needed to carry out this task in the column 'Knee Replacement Post-Op Q Pain' where the intensity of pain has been given a numerical value therefore making this a regression problem. Classification, a type of supervised machine learning method should be used in this task. Again linear regression could be used in this task however it would assume the linear relationship between predictors and pain score. I would be more inclined to use either Random forest regressor or Support vector regression in order to predict pain.  
+*Answers:* In the 'Knee replacement data set' we have the data needed to carry out this task in the column 'Knee Replacement Post-Op Q Pain' where the intensity of pain has been given a numerical value therefore making this a regression problem. Classification, a type of supervised machine learning method should be used in this task. Again linear regression could be used in this task however it would assume the linear relationship between predictors and pain score. I would be more inclined to use either Random forest regressor or Support vector regression in order to predict pain.
 
-#3. Before the operation, can we calculate how many patients have had previous surgery? 
+#3. Before the operation, can we calculate how many patients have had previous surgery?
 
-*Answer:* Yes, we can calculate the number of patients that had prior surgeries in our data set. Our data set contains the column "Pre-Op Q Previous Surgery" in which patients answers are coded as follows; 1 = 'Yes', 2 = 'No', and 9 = 'Missing value'. Therefore we can filter for specific '1' value to calculate the number of patients who had previous surgies. In our data set this means that there were 537 patients in our data set who had previous surgery. 
+*Answer:* Yes, we can calculate the number of patients that had prior surgeries in our data set. Our data set contains the column "Pre-Op Q Previous Surgery" in which patients answers are coded as follows; 1 = 'Yes', 2 = 'No', and 9 = 'Missing value'. Therefore we can filter for specific '1' value to calculate the number of patients who had previous surgies. In our data set this means that there were 537 patients in our data set who had previous surgery.
 
-table(Knee_Data$`Pre-Op Q Previous Surgery`)
+table(Knee_Data\$`Pre-Op Q Previous Surgery`)
 
 ```{r}
 # Set seed for reproducibility
@@ -79,16 +78,9 @@ knee_test <- testing(Knee_split)
 # ✅ Clean and prep training and testing data
 knee_train_clean <- knee_train %>%
   drop_na() %>%
-  select(-Procedure, -Year) %>%                     # Drop Procedure & Year together
+  select(-any_of(c("Procedure", "Year"))) %>%                    # Drop Procedure & Year together
   mutate(across(where(is.character), as.factor))
-knee_train_clean <- knee_train_clean %>% select(-any_of("Year"))
-knee_test_clean <- knee_test_clean %>% select(-any_of("Year"))
 
-
-knee_test_clean <- knee_test %>%
-  drop_na() %>%
-  select(-Procedure, -Year) %>%
-  mutate(across(where(is.character), as.factor))
 
 # ✅ Check for any missing values just in case
 colSums(is.na(knee_train_clean))
@@ -96,12 +88,23 @@ colSums(is.na(knee_train_clean))
 # ✅ Build recipe
 pain_recipe <- recipe(`Knee Replacement Post-Op Q Pain` ~ ., data = knee_train_clean) %>%
   step_dummy(all_nominal_predictors(), one_hot = TRUE) %>%
-  step_zv(all_predictors())
+  step_zv(all_predictors())  # Remove predictors with zero variance
 
+# ✅ Specify a random forest model
+rf_model <- rand_forest(mode = "regression", trees = 500) %>%
+  set_engine("ranger")
+
+# ✅ Create a workflow to combine recipe and model
+rf_workflow <- workflow() %>%
+  add_recipe(pain_recipe) %>%
+  add_model(rf_model)
+
+# ✅ Train the model
+rf_fit <- rf_workflow %>%
+  fit(data = knee_train_clean)
 ```
 
-
-2.	Selection and preprocessing of predictors
+2.  Selection and preprocessing of predictors
 
 ```{r}
 knee_train_clean <- knee_train %>%
@@ -124,11 +127,7 @@ pain_recipe <- recipe(`Knee Replacement Post-Op Q Pain` ~ ., data = knee_train_c
 
 ```
 
-
-
-
-
-3.	Model specification and training
+3.  Model specification and training
 
 ```{r}
 # Specify a random forest model
@@ -154,11 +153,42 @@ pain_recipe <- recipe(`Knee Replacement Post-Op Q Pain` ~ ., data = knee_train_c
 
 ```
 
-4.	Model evaluation
+4.  Model evaluation
 
 ```{r}
+# Clean the test set (just like training)
+knee_test_clean <- knee_test %>%
+  drop_na() %>%
+  select(-any_of(c("Procedure", "Year"))) %>%
+  mutate(across(where(is.character), as.factor))
 
+# Predict on test data
+rf_predictions <- predict(rf_fit, new_data = knee_test_clean) %>%
+  bind_cols(knee_test_clean %>% select(`Knee Replacement Post-Op Q Pain`))
+
+# Evaluate performance
+rf_metrics <- rf_predictions %>%
+  metrics(truth = `Knee Replacement Post-Op Q Pain`, estimate = .pred)
+
+rf_metrics
+
+#Visualisation
+
+ggplot(rf_predictions, aes(x = .pred, y = `Knee Replacement Post-Op Q Pain`)) +
+  geom_point(alpha = 0.6) +
+  geom_abline(color = "red", linetype = "dashed") +
+  labs(title = "Predicted vs Actual Pain Scores",
+       x = "Predicted",
+       y = "Actual") +
+  theme_minimal()
+
+ggplot(rf_predictions, aes(x = .pred, y = `Knee Replacement Post-Op Q Pain`)) +
+  geom_point(alpha = 0.6, color = "steelblue") +
+  geom_abline(color = "red", linetype = "dashed") +
+  labs(title = "Predicted vs Actual Post-Op Pain Scores",
+       x = "Predicted Pain Score",
+       y = "Actual Pain Score") +
+  theme_minimal()
 ```
 
 ## Limitations of machine learning model
-
