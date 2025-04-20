@@ -1,0 +1,164 @@
+---
+title: "PU5558-PU5567-computer-lab-report"
+author: "Anonymous"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Load necessary packages
+
+We begin by loading the nessicary packages required to carry out all comands needed in this report. Tidyverse, as we learnt in our previous module is required for our general data science, along with "ggplots" for visualisation, and corrplot for visualising correlation matrices and tinymodels which was introduced to us this term is required for machine learning - our main focus this term. 
+```{r}
+# install.packages("devtools")
+library(tidyverse)    
+library(tidymodels)   
+library(ggplot2)      
+library(corrplot)
+install.packages("ranger")
+library(ranger)
+# install.packages("devtools")
+devtools::install_github("r-lib/conflicted")
+
+```
+
+## Load chosen dataset
+
+We were provided two seperate data sets containing "Provisional Patient Record Outcomes" to select from to answer our question for this assignment. Out of the two I have selected "Knee replacement CCG 2021" which can be found at the following address: https://digital.nhs.uk/data-and-information/publications/statistical/patient-reported-outcome-measures-proms/hip-and-knee-replacement-procedures-april-2020-to-march-2021
+
+To load this data set into my studio to then work with I will be using the "read_csv" function. 
+
+```{r}
+#Read in data
+Knee_Data <-read_csv ("~/Downloads/Knee Replacement CCG 2021.csv")
+
+glimpse(Knee_Data)
+```
+
+## Dataset description
+
+
+
+
+## Suitable machine learning algorithm for three questions:
+
+#1. Before the operation, can we estimate the post-operative EQ5D index for a patient?
+
+*Answer:* When looking to estimate post-operative EQ5D index we are looking at a regression problem as the EQ5D is a continuos value outcome, therefore require supervised machine learning to solve the issue. This task requires to use a dataset of patient reported outcomes and other relevant information to train a model to predict the EQ5D score. Therefore I would choose to utilise a random forest regressor as it has the ability to handle both catagoricol and numerical predictors and is good when handling data which may contain missing values and outliers. 
+
+When looking into which model would be best suited for the task I also investigated the use of linear regression however for this task in particular it is important the model does not assume a linear relationship between variables and allows for more flexibility when working with more complex interactions in patient data, e.g age or pre-existing conditions. 
+
+Overall, I beleive Random forest has a better balance of predictive performance with practical usability for this task making it my choice for estimating post-operative EQ5D- index. 
+
+
+#2. Before the operation, can we predict how much pain a patient will have after the operation?
+
+*Answers:* In the 'Knee replacement data set' we have the data needed to carry out this task in the column 'Knee Replacement Post-Op Q Pain' where the intensity of pain has been given a numerical value therefore making this a regression problem. Classification, a type of supervised machine learning method should be used in this task. Again linear regression could be used in this task however it would assume the linear relationship between predictors and pain score. I would be more inclined to use either Random forest regressor or Support vector regression in order to predict pain.  
+
+#3. Before the operation, can we calculate how many patients have had previous surgery? 
+
+*Answer:* Yes, we can calculate the number of patients that had prior surgeries in our data set. Our data set contains the column "Pre-Op Q Previous Surgery" in which patients answers are coded as follows; 1 = 'Yes', 2 = 'No', and 9 = 'Missing value'. Therefore we can filter for specific '1' value to calculate the number of patients who had previous surgies. In our data set this means that there were 537 patients in our data set who had previous surgery. 
+
+table(Knee_Data$`Pre-Op Q Previous Surgery`)
+
+```{r}
+# Set seed for reproducibility
+set.seed(123)
+
+# Split the data (80% train, 20% test) stratified by pain score
+Knee_split <- initial_split(Knee_Data, 
+                            prop = 0.8, 
+                            strata = `Knee Replacement Post-Op Q Pain`)
+
+# Create training and testing datasets
+knee_train <- training(Knee_split)
+knee_test <- testing(Knee_split)
+
+# ✅ Clean and prep training and testing data
+knee_train_clean <- knee_train %>%
+  drop_na() %>%
+  select(-Procedure, -Year) %>%                     # Drop Procedure & Year together
+  mutate(across(where(is.character), as.factor))
+knee_train_clean <- knee_train_clean %>% select(-any_of("Year"))
+knee_test_clean <- knee_test_clean %>% select(-any_of("Year"))
+
+
+knee_test_clean <- knee_test %>%
+  drop_na() %>%
+  select(-Procedure, -Year) %>%
+  mutate(across(where(is.character), as.factor))
+
+# ✅ Check for any missing values just in case
+colSums(is.na(knee_train_clean))
+
+# ✅ Build recipe
+pain_recipe <- recipe(`Knee Replacement Post-Op Q Pain` ~ ., data = knee_train_clean) %>%
+  step_dummy(all_nominal_predictors(), one_hot = TRUE) %>%
+  step_zv(all_predictors())
+
+```
+
+
+2.	Selection and preprocessing of predictors
+
+```{r}
+knee_train_clean <- knee_train %>%
+  drop_na() %>%
+  select(-Procedure) %>%
+  mutate(across(where(is.character), as.factor))
+
+knee_test_clean <- knee_test %>%
+  drop_na() %>%
+  select(-Procedure) %>%
+  mutate(across(where(is.character), as.factor))
+
+# Check for missing values just in case
+colSums(is.na(knee_train_clean))
+
+# Build recipe (now safe to use step_dummy)
+pain_recipe <- recipe(`Knee Replacement Post-Op Q Pain` ~ ., data = knee_train_clean) %>%
+  step_dummy(all_nominal_predictors(), one_hot = TRUE) %>%  # Creates dummy vars
+  step_zv(all_predictors())  
+
+```
+
+
+
+
+
+3.	Model specification and training
+
+```{r}
+# Specify a random forest model
+rf_model <- rand_forest(mode = "regression", trees = 500) %>%
+  set_engine("ranger")
+
+# Create a workflow to combine recipe and model
+rf_workflow <- workflow() %>%
+  add_recipe(pain_recipe) %>%
+  add_model(rf_model)
+
+pain_recipe <- recipe(`Knee Replacement Post-Op Q Pain` ~ ., data = knee_train_clean) %>%
+  step_dummy(all_nominal_predictors()) %>%
+  step_zv(all_predictors())  # Remove zero variance predictors
+
+
+# Train the random forest model on the cleaned training data
+pain_recipe <- recipe(`Knee Replacement Post-Op Q Pain` ~ ., data = knee_train_clean) %>%
+  step_dummy(all_nominal_predictors(), one_hot = TRUE) %>%
+  step_zv(all_predictors)
+
+
+
+```
+
+4.	Model evaluation
+
+```{r}
+
+```
+
+## Limitations of machine learning model
+
