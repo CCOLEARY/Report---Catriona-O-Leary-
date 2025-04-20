@@ -1,7 +1,12 @@
 ---
 title: "PU5558-PU5567-computer-lab-report"
 author: "Anonymous"
-output: pdf_document
+output: pdf
+  pdf_document:
+    toc: true
+    toc_depth: 2
+    number_sections: true
+    keep_tex: true
 ---
 
 ```{r setup, include=FALSE}
@@ -10,20 +15,29 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ## Load necessary packages
 
-We begin by loading the nessicary packages required to carry out all comands needed in this report. Tidyverse, as we learnt in our previous module is required for our general data science, along with "ggplots" for visualisation, and corrplot for visualising correlation matrices and tinymodels which was introduced to us this term is required for machine learning - our main focus this term.
+We begin by loading the nessicary packages required to carry out all comands needed in this report. Tidyverse, as we learnt in our previous module is required for our general data science, along with "ggplots" for visualisation, and corrplot for visualising correlation matrices and tinymodels which was introduced to us this term is required for machine learning - our main focus this term. I have loaded the following packages for these reasons:
+
+tidyverse: For helping us turn our raw data into a usuable/structured format and visualisation
+
+tidymodels: for building our machine learning models
+
+corrplot: For its visual exploratory tool on correlation matrixes
+
+ranger: For running random forest models
+
+ggplot2: For plotting and interpreting results
 
 ```{r}
 #Install Packages
 
-# install.packages("devtools")
+
 library(tidyverse)    
 library(tidymodels)   
 library(ggplot2)      
 library(corrplot)
-install.packages("ranger")
 library(ranger)
-# install.packages("devtools")
-devtools::install_github("r-lib/conflicted")
+library(devtools)
+
 
 ```
 
@@ -31,30 +45,49 @@ devtools::install_github("r-lib/conflicted")
 
 We were provided two seperate data sets containing "Provisional Patient Record Outcomes" to select from to answer our question for this assignment. Out of the two I have selected "Knee replacement CCG 2021" which can be found at the following address: <https://digital.nhs.uk/data-and-information/publications/statistical/patient-reported-outcome-measures-proms/hip-and-knee-replacement-procedures-april-2020-to-march-2021>
 
-To load this data set into my studio to then work with I will be using the "read_csv" function.
+To load this data set into my studio to then work with I will be using the "read_csv" function. Next I use the glimpse() function to view the raw data we have imported.
 
 ```{r}
 #Read in data
 Knee_Data <-read_csv ("~/Downloads/Knee Replacement CCG 2021.csv")
 
+# Glimpse the data we have read in
 glimpse(Knee_Data)
 ```
 
 ## Dataset description
 
+The dataset I have chosed to use for this assignment was "Knee Replacement CCG 2021". It contains patient reported outcome measures from patients who underwent knee replacmeent surgery in Englang between April 2020 and March 2021. The dataset inclues 5,422 observations and 81 variables covering a wide range of pre-operative and post-operative information. The variables from this dataset fall into severable categories:
+
+Demographics: Age band, gender
+
+Pre-operative health status: EQ-5D Index and Visual Analogue Scale (VAS), pain, mobility, anxiety, and self-care levels
+
+Pre-existing conditions: Binary indicators for arthritis, diabetes, cancer, heart disease, and others
+
+Surgical history: Whether the patient had undergone previous surgeries
+
+Post-operative outcomes: Pain scores, satisfaction, complications, and post-op EQ5D index
+
+Administrative data: Provider codes, procedure type (all knee replacements), and reporting year
+
+In the data set pain score has been given a numerical values: 0 = Severe 1 = Moderate 2 = Mild 3 = Very Mild 4 = None 9 = Missing
+
+In this analysis, only relevant variables were retained, and rows with missing data were removed during preprocessing.
+
 ## Suitable machine learning algorithm for three questions:
 
 #1. Before the operation, can we estimate the post-operative EQ5D index for a patient?
 
-*Answer:* When looking to estimate post-operative EQ5D index we are looking at a regression problem as the EQ5D is a continuos value outcome, therefore require supervised machine learning to solve the issue. This task requires to use a dataset of patient reported outcomes and other relevant information to train a model to predict the EQ5D score. Therefore I would choose to utilise a random forest regressor as it has the ability to handle both catagoricol and numerical predictors and is good when handling data which may contain missing values and outliers.
+*Answer:* When looking to estimate post-operative EQ5D index we are looking at a regression problem as the EQ5D is a continuous value outcome, therefore require supervised machine learning to solve the issue. This task requires to use a data set of patient reported outcomes and other relevant information to train a model to predict the EQ5D score. Therefore I would choose to utilise a random forest regressor as it has the ability to handle both categorical and numerical predictors and is good when handling data which may contain missing values and outliers.
 
 When looking into which model would be best suited for the task I also investigated the use of linear regression however for this task in particular it is important the model does not assume a linear relationship between variables and allows for more flexibility when working with more complex interactions in patient data, e.g age or pre-existing conditions.
 
-Overall, I beleive Random forest has a better balance of predictive performance with practical usability for this task making it my choice for estimating post-operative EQ5D- index.
+Overall, I believe Random forest has a better balance of predictive performance with practical usability for this task making it my choice for estimating post-operative EQ5D- index.
 
 #2. Before the operation, can we predict how much pain a patient will have after the operation?
 
-*Answers:* In the 'Knee replacement data set' we have the data needed to carry out this task in the column 'Knee Replacement Post-Op Q Pain' where the intensity of pain has been given a numerical value therefore making this a regression problem. Classification, a type of supervised machine learning method should be used in this task. Again linear regression could be used in this task however it would assume the linear relationship between predictors and pain score. I would be more inclined to use either Random forest regressor or Support vector regression in order to predict pain.
+*Answers:* In the 'Knee replacement data set' we have the data needed to carry out this task in the column 'Knee Replacement Post-Op Q Pain' where the intensity of pain has been given a numerical value therefore making this a regression problem, a type of supervised machine learning method should be used in this task. Again linear regression could be used in this task however it would assume the linear relationship between predictors and pain score. I would be more inclined to use either Random forest regressor or Support vector regression in order to predict pain. This is a regression task since the pain score is numeric. Considering both models I have chosen to use random forest due to its flexibility, ability to handle nonlinear relationships, and resilience to missing values and outliers.
 
 #3. Before the operation, can we calculate how many patients have had previous surgery?
 
@@ -62,11 +95,19 @@ Overall, I beleive Random forest has a better balance of predictive performance 
 
 table(Knee_Data\$`Pre-Op Q Previous Surgery`)
 
+##Question:
+
+For my machine learning question I have chosen to use question two: Before the operation, can we predict how much pain a patient will have after the operation? For which I will be using a random forest tree.
+
+#Data splitting
+
+Our first step is data splitting, where we split the data into speperate parts to train our model. I will be splitting my data into a 80% training set and a 20% testing set using the initial_split() function grouped by the outcome variable (Post-op pain) to maintain the distribution of target values.
+
 ```{r}
 # Set seed for reproducibility
 set.seed(123)
 
-# Split the data (80% train, 20% test) stratified by pain score
+# Split the data (80% train, 20% test) grouped by pain score
 Knee_split <- initial_split(Knee_Data, 
                             prop = 0.8, 
                             strata = `Knee Replacement Post-Op Q Pain`)
@@ -75,59 +116,42 @@ Knee_split <- initial_split(Knee_Data,
 knee_train <- training(Knee_split)
 knee_test <- testing(Knee_split)
 
-# ✅ Clean and prep training and testing data
+# Clean and prep training and testing data
 knee_train_clean <- knee_train %>%
   drop_na() %>%
-  select(-any_of(c("Procedure", "Year"))) %>%                    # Drop Procedure & Year together
+  select(-any_of(c("Procedure", "Year"))) %>%                    
+
+# Drop Procedure & Year together
   mutate(across(where(is.character), as.factor))
 
 
-# ✅ Check for any missing values just in case
-colSums(is.na(knee_train_clean))
 
-# ✅ Build recipe
-pain_recipe <- recipe(`Knee Replacement Post-Op Q Pain` ~ ., data = knee_train_clean) %>%
-  step_dummy(all_nominal_predictors(), one_hot = TRUE) %>%
-  step_zv(all_predictors())  # Remove predictors with zero variance
-
-# ✅ Specify a random forest model
-rf_model <- rand_forest(mode = "regression", trees = 500) %>%
-  set_engine("ranger")
-
-# ✅ Create a workflow to combine recipe and model
-rf_workflow <- workflow() %>%
-  add_recipe(pain_recipe) %>%
-  add_model(rf_model)
-
-# ✅ Train the model
-rf_fit <- rf_workflow %>%
-  fit(data = knee_train_clean)
 ```
 
-2.  Selection and preprocessing of predictors
+# 2.Selection and preprocessing of predictors
+
+We next need to remove any missing values and drop any uninformative columns such as 'year' and procedure' to ensure the machine learning model receives complete and consistent input. Then we identify any catagorial variables in the dataset and convert them into dummy variables (using the step_dummy function) thus allowing the model to interpret them numericaly. The processing recipe can then be made with the recipe function.
 
 ```{r}
-knee_train_clean <- knee_train %>%
-  drop_na() %>%
-  select(-Procedure) %>%
-  mutate(across(where(is.character), as.factor))
-
+# Cleaning our data
 knee_test_clean <- knee_test %>%
   drop_na() %>%
   select(-Procedure) %>%
   mutate(across(where(is.character), as.factor))
 
-# Check for missing values just in case
+# Check for missing values 
 colSums(is.na(knee_train_clean))
 
-# Build recipe (now safe to use step_dummy)
+# Build recipe
 pain_recipe <- recipe(`Knee Replacement Post-Op Q Pain` ~ ., data = knee_train_clean) %>%
-  step_dummy(all_nominal_predictors(), one_hot = TRUE) %>%  # Creates dummy vars
+  step_dummy(all_nominal_predictors(), one_hot = TRUE) %>%
   step_zv(all_predictors())  
 
 ```
 
-3.  Model specification and training
+# 3. Model specification and training
+
+Next We specify that we will be using a random forest model by using the (ranger) function. I chose the random forest model as it can handle both categorical and numerical predictors and is good at managing missing data. Using the tidymodels function I have created a random forest with 500 treees. This is followed by combining the recipe and model to create a single workflow, ensuring that the same processing steps are applied during training the model and future prediction. The fit() function has been used to train the model using cleaned training datasets, allowing it to learn patterns in data that would influence post-op pain scores.
 
 ```{r}
 # Specify a random forest model
@@ -138,10 +162,6 @@ rf_model <- rand_forest(mode = "regression", trees = 500) %>%
 rf_workflow <- workflow() %>%
   add_recipe(pain_recipe) %>%
   add_model(rf_model)
-
-pain_recipe <- recipe(`Knee Replacement Post-Op Q Pain` ~ ., data = knee_train_clean) %>%
-  step_dummy(all_nominal_predictors()) %>%
-  step_zv(all_predictors())  # Remove zero variance predictors
 
 
 # Train the random forest model on the cleaned training data
@@ -154,6 +174,18 @@ pain_recipe <- recipe(`Knee Replacement Post-Op Q Pain` ~ ., data = knee_train_c
 ```
 
 4.  Model evaluation
+
+Finally we evaluate our models performance using unseen testing data. For this I used three standar regresion metrics:
+
+Root meann squared error: Which measures the average difference between values predicted by the model and the actual values.
+
+Mean absolute Error: Measuring the difference between the predicted and actual pain scores.
+
+R-squared (R²): Which evaluates the quality of our model.
+
+The results showed a relatively low RMSE and MAE, suggesting that the model's predictions were close to the actual values on average. An R² value of approximately 0.67 indicates that the model explained around 67% of the variation in post-operative pain scores.
+
+I then visualised the model's predictions against the pain score using a scatterplot. The nearer the points plotter are to the diagnoal line the better the models prediction was. Most of the points from our model aligned well especially around a medium level of pain. However they are sightly further out when looking at the two extremes of the pain values.
 
 ```{r}
 # Clean the test set (just like training)
@@ -174,13 +206,6 @@ rf_metrics
 
 #Visualisation
 
-ggplot(rf_predictions, aes(x = .pred, y = `Knee Replacement Post-Op Q Pain`)) +
-  geom_point(alpha = 0.6) +
-  geom_abline(color = "red", linetype = "dashed") +
-  labs(title = "Predicted vs Actual Pain Scores",
-       x = "Predicted",
-       y = "Actual") +
-  theme_minimal()
 
 ggplot(rf_predictions, aes(x = .pred, y = `Knee Replacement Post-Op Q Pain`)) +
   geom_point(alpha = 0.6, color = "steelblue") +
@@ -192,3 +217,7 @@ ggplot(rf_predictions, aes(x = .pred, y = `Knee Replacement Post-Op Q Pain`)) +
 ```
 
 ## Limitations of machine learning model
+
+I felt the machine learning model I created worked resonably well when predicting post-op pain in patients. However it is certainly not perfect and some limitations should be acknowledged. Firstly the model lacks interpretability, which, when in a clinical setting, transpancy and ease of interpretation is important. Additionally having to handle missing data by removing rows may have reduced the true representativeness of the dataset. This could lead to a risk of the model reflecting underlying biases in data particularly if certain patient groups are underrepresented. Finally, although the model identifies associations, it does not determine causation, and its generalisability may be limited to the population and time the dataset was created. Future research may involve model interpretability methods, alternative imputation methods, or external validation with more recent or different patient data.
+
+Despite these limitations, the model shows potential for supporting decision-making around expected post-operative outcomes, provided it is used alongside clinical judgment.
